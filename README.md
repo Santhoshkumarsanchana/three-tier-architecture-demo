@@ -160,7 +160,7 @@ kubectl create ns robot-shop
 ![Step 3](screenshots/03-namespace-created.png)
 
 ### Step 4: Worker Nodes Ready and All Pods Running
-Deployed the Helm chart from `K8s/helm`. All 3 nodes are Ready and all 11 pods are Running with 0 restarts.
+Deployed the Helm chart from `K8s/helm`. All 3 nodes are Ready and all 12 pods are Running with 0 restarts.
 
 ![Step 4](screenshots/04-nodes-and-pods-running.png)
 
