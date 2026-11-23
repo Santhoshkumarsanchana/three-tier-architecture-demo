@@ -127,7 +127,7 @@ $ curl http://<host>:8080/api/payment/metrics
 ```
 # My Deployment: Robot Shop on AWS EKS
 
-Hands-on deployment of Stan's Robot Shop (12 microservices) on Amazon EKS using eksctl, kubectl and Helm. This document records my own deployment run, step by step.
+Hands-on deployment of Stan's Robot Shop on Amazon EKS using eksctl, kubectl and Helm. This document records my own deployment run, step by step.
 
 ## Tech Stack
 - **Cloud:** AWS (EKS, EC2, ELB, IAM)
@@ -208,7 +208,4 @@ Confirmed the three t3.medium worker nodes are running with all status checks pa
 - Verifying cluster and pod health with kubectl
 - Handling AWS credentials safely
 
-## Next Steps
-- Expose the app with an Ingress using the AWS Load Balancer Controller (ALB) and IAM OIDC/IRSA
-- Add CI/CD and monitoring
-- Clean up AWS resources after testing to avoid charges
+
