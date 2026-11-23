@@ -125,4 +125,90 @@ To test the metrics use:
 $ curl http://<host>:8080/api/cart/metrics
 $ curl http://<host>:8080/api/payment/metrics
 ```
+# My Deployment: Robot Shop on AWS EKS
 
+Hands-on deployment of Stan's Robot Shop (12 microservices) on Amazon EKS using eksctl, kubectl and Helm. This document records my own deployment run, step by step.
+
+## Tech Stack
+- **Cloud:** AWS (EKS, EC2, ELB, IAM)
+- **Tooling:** AWS CLI, eksctl, kubectl, Helm
+- **Services:** Nginx/AngularJS (web), Node.js, Java, Python, Go, PHP
+- **Data layer:** MongoDB, MySQL, Redis, RabbitMQ
+
+## Architecture
+Browser -> AWS Load Balancer -> `web` -> backend microservices (cart, catalogue, user, payment, shipping, ratings, dispatch) -> MongoDB / MySQL / Redis / RabbitMQ, all in the `robot-shop` namespace on a 3-node EKS managed node group.
+
+---
+
+### Step 1: AWS CLI Configuration and Tools Setup (kubectl, eksctl, Helm)
+Installed kubectl, eksctl and Helm on an EC2 workstation, configured the AWS CLI with an IAM user, and verified access with `aws sts get-caller-identity`.
+
+![Step 1](screenshots/01-aws-cli-and-tools-setup.png)
+
+### Step 2: EKS Cluster Provisioned with eksctl
+Created the `robot-shop` cluster in `us-east-1` with a managed node group of 3 nodes. Addons created: vpc-cni, kube-proxy, metrics-server.
+
+![Step 2](screenshots/02-eks-cluster-created.png)
+
+### Step 3: Creating the `robot-shop` Namespace
+Created a dedicated namespace to isolate the application resources.
+
+```bash
+kubectl create ns robot-shop
+```
+
+![Step 3](screenshots/03-namespace-created.png)
+
+### Step 4: Worker Nodes Ready and All Pods Running
+Deployed the Helm chart from `K8s/helm`. All 3 nodes are Ready and all 11 pods are Running with 0 restarts.
+
+![Step 4](screenshots/04-nodes-and-pods-running.png)
+
+### Step 5: Kubernetes Services and AWS LoadBalancer for the Web Frontend
+Backend services use ClusterIP (internal only). The `web` service is exposed to the internet through an AWS LoadBalancer.
+
+![Step 5](screenshots/05-services-loadbalancer.png)
+
+### Step 6: Application Live on the Load Balancer URL
+Opened the load balancer DNS on port 8080 and the storefront loaded successfully.
+
+![Step 6](screenshots/06-app-home-page.png)
+
+### Step 6a: Testing the Cart Service (Single Item)
+Added an item to the cart to test the cart service and Redis.
+
+![Step 6a](screenshots/07-cart-first-item.png)
+
+### Step 6b: Product Catalogue and Ratings Service
+Opened a product page, served by the catalogue (MongoDB) and ratings services.
+
+![Step 6b](screenshots/08-product-page.png)
+
+### Step 6c: Cart with Multiple Items and Tax Calculation
+Added several products and verified the cart total and tax calculation.
+
+![Step 6c](screenshots/09-cart-multiple-items.png)
+
+### Step 6d: Checkout Complete via the Payment Service
+Completed checkout and received an order confirmation, proving the flow works across the microservices.
+
+![Step 6d](screenshots/10-order-placed.png)
+
+### Step 7: EKS Worker Nodes Running in the AWS EC2 Console
+Confirmed the three t3.medium worker nodes are running with all status checks passed.
+
+![Step 7](screenshots/11-ec2-instances.png)
+
+---
+
+## What I Learned
+- Provisioning EKS and managed node groups with eksctl
+- Deploying multi-service applications with Helm
+- ClusterIP vs LoadBalancer services and how traffic reaches the app
+- Verifying cluster and pod health with kubectl
+- Handling AWS credentials safely
+
+## Next Steps
+- Expose the app with an Ingress using the AWS Load Balancer Controller (ALB) and IAM OIDC/IRSA
+- Add CI/CD and monitoring
+- Clean up AWS resources after testing to avoid charges
